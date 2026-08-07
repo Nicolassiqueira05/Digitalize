@@ -21,69 +21,80 @@ class DocumentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    print("TOTAL IMAGES: ${documentPageManager.images.length}");
-
-    print(documentPageManager.images);
-
-    print(documentPageManager.document);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Documento"),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Center(
-        child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: onPageChanged,
-            itemCount: documentPageManager.images.length,
-            itemBuilder: (context, index){
-
-              final image = documentPageManager.images[index];
-
-              return Padding(
-                padding: EdgeInsets.all(10),
-                child: Image.file(
-                  File(image.path),
-                  fit: BoxFit.contain,
+    return
+      AnimatedBuilder(
+          animation: documentPageManager,
+          builder: (context, _) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(documentPageManager.document.name),
+                backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
                 ),
-              );
-            }
-        )
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).colorScheme.inversePrimary,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              onPressed: () async {
-                final confirmed = await DialogService.delete(context);
+              ),
+              body: Center(
+                  child: PageView.builder(
+                      controller: _pageController,
+                      onPageChanged: onPageChanged,
+                      itemCount: documentPageManager.images.length,
+                      itemBuilder: (context, index){
 
-                if (confirmed == true) {
-                  documentPageManager.deleteDocument();
+                        final image = documentPageManager.images[index];
 
-                  if (!context.mounted) return;
+                        return Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Image.file(
+                            File(image.path),
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      }
+                  )
+              ),
+              bottomNavigationBar: BottomAppBar(
+                color: Theme.of(context).colorScheme.inversePrimary,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    IconButton(
+                      onPressed: () async {
+                        final confirmed = await DialogService.delete(context);
 
-                  Navigator.pop(context, true);
-                }
-              },
-              icon: Icon(Icons.delete),
-            ),
-            IconButton(
-                onPressed: () => {},
-                icon: Icon(Icons.folder)),
-            IconButton(
-              onPressed: () => {documentPageManager.shareImage()},
-              icon: Icon(Icons.share),
-            ),
-            IconButton(
-              onPressed: () => {},
-              icon: Icon(Icons.download),
-            ),
-          ],
-        ),
-      ),
-    );
+                        if (confirmed == true) {
+                          documentPageManager.deleteDocument();
+
+                          if (!context.mounted) return;
+
+                          Navigator.pop(context, true);
+                        }
+                      },
+                      icon: Icon(Icons.delete),
+                    ),
+                    IconButton(
+                        onPressed: () async {
+                          final t = await DialogService.rename(context, documentPageManager.document);
+                          if(t == null) return;
+                          await documentPageManager.renameDocument(documentPageManager.document, t);
+                        },
+                        icon: Icon(Icons.drive_file_rename_outline)),
+                    IconButton(
+                      onPressed: () async {
+
+                      },
+                      icon: Icon(Icons.info_outline),
+                    ),
+                    IconButton(
+                      onPressed: () => {documentPageManager.shareImage()},
+                      icon: Icon(Icons.share),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
   }
 }

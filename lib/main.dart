@@ -94,7 +94,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    print(documentListManager.documentList);
     return AnimatedBuilder(
       animation: documentListManager,
       builder: (context, _) {

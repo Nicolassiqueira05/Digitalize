@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:digitalize/Data/Database/database.dart';
 import 'package:digitalize/Data/Models/document_model.dart';
 import 'package:digitalize/data/models/image_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,7 +12,7 @@ import 'dart:ui' as ui;
 import 'package:pdf/pdf.dart';
 import 'package:file_picker/file_picker.dart' as fp;
 
-class DocumentPageManager {
+class DocumentPageManager extends ChangeNotifier {
   late DocumentModel document;
   late DatabaseManager databaseManager;
   late Uint8List pdf;
@@ -42,6 +43,12 @@ class DocumentPageManager {
     await databaseManager.deleteDocument(document);
   }
 
+  Future<void> renameDocument(DocumentModel doc, String name) async {
+    doc.name = name;
+    await databaseManager.updateDocument(doc);
+    notifyListeners();
+  }
+
   Future<void> saveImage() async {
     final bytes = await generatePDF();
     final file = await createTempPdf(bytes);
@@ -55,7 +62,7 @@ class DocumentPageManager {
 
     if(outputFile != null){
       final f = File(outputFile);
-      await file.writeAsBytes(bytes);
+      await f.writeAsBytes(bytes);
       print('PDF salvo em: $outputFile');
     }
 
