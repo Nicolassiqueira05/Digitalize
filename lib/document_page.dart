@@ -83,7 +83,7 @@ class DocumentPage extends StatelessWidget {
                         icon: Icon(Icons.drive_file_rename_outline)),
                     IconButton(
                       onPressed: () async {
-
+                        DialogService.showInfo(context, documentPageManager.document);
                       },
                       icon: Icon(Icons.info_outline),
                     ),

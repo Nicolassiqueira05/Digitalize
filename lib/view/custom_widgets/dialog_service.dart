@@ -162,4 +162,36 @@ class DialogService {
       }
     }
   }
+
+  static Future<void> showInfo(BuildContext context, DocumentModel doc) async {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              height: 200,
+              child: Column(
+                mainAxisSize: MainAxisSize.min, // Faz o dialog usar apenas o espaço necessário
+                mainAxisAlignment: MainAxisAlignment.start, // Alinha os itens no topo (vertical)
+                crossAxisAlignment: CrossAxisAlignment.start, // Alinha os itens na esquerda (horizontal)
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      IconButton(onPressed: () => {Navigator.pop(context)}, icon: Icon(Icons.close))
+                    ],
+                  ),
+                  Text("Dados:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  Row(children: [Text("Nome: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text("${doc.name}", style: TextStyle(fontSize: 20, color: Colors.black))]),
+                  Row(children: [Text("Páginas: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text("${doc.images.length}", style: TextStyle(fontSize: 20))]),
+                  Row(children: [Text("Data de criação: ", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)), Text("${doc.createdAt}", style: TextStyle(fontSize: 20))]),
+                ],
+              ),
+            ),
+          );
+    }
+    );
+  }
 }
