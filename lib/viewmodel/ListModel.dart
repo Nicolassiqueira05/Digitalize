@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 class ListModel extends ChangeNotifier {
   final DatabaseManager databaseManager = DatabaseManager();
   List<DocumentModel> documentList = [];
-  Set<DocumentModel> selectedDocuments = {};
+  Set<int> selectedDocuments = {};
 
 
   Future<void> loadDocuments() async {
@@ -32,17 +32,17 @@ class ListModel extends ChangeNotifier {
   //Selection
 
   void selectDocument(DocumentModel doc) {
-    if (selectedDocuments.contains(doc)) {
-      selectedDocuments.remove(doc);
+    if (selectedDocuments.contains(doc.id)) {
+      selectedDocuments.remove(doc.id);
     } else {
-      selectedDocuments.add(doc);
+      selectedDocuments.add(doc.id ?? 0);
     }
     notifyListeners();
   }
 
   Future<void> deleteSelectedDocuments() async {
-    for (var doc in selectedDocuments){
-      await databaseManager.deleteDocument(doc);
+    for (var id in selectedDocuments){
+      await databaseManager.deleteDocument(documentList.firstWhere((e) => e.id == id));
     }
     selectedDocuments.clear();
 
