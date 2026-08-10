@@ -2,14 +2,21 @@ import 'package:digitalize/Data/Database/database.dart';
 import 'package:digitalize/Data/Models/document_model.dart';
 import 'package:digitalize/document_page.dart';
 import 'package:digitalize/view/custom_widgets/dialog_service.dart';
+import 'package:digitalize/viewmodel/ListModel.dart';
 import 'package:digitalize/viewmodel/document_list_manager.dart';
 import 'package:digitalize/view/custom_widgets/document_list.dart';
 import 'package:digitalize/document_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+      ChangeNotifierProvider(
+        create: (context) => ListModel(),
+        child: const MyApp()
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -37,12 +44,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final DocumentListManager documentListManager = DocumentListManager();
 
   @override
   void initState() {
     super.initState();
-    documentListManager.loadDocuments();
+    //documentListManager.loadDocuments();
+    Future.microtask(() {
+      context.read<ListModel>().loadDocuments();
+    });
+    
   }
 
   void _newDocument() async {
@@ -70,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
 
-    documentListManager.loadDocuments();
+    context.read<ListModel>().loadDocuments();
   }
 
   void loadDocument(DocumentModel doc) async {
@@ -80,54 +90,52 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     if (result == true) {
-      documentListManager.loadDocuments();
+      context.read<ListModel>().loadDocuments();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    documentListManager.loadDocuments();
+    context.read<ListModel>().loadDocuments();
   }
 
   DatabaseManager db = DatabaseManager();
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: documentListManager,
-      builder: (context, _) {
+
+    final model = context.watch<ListModel>();
+
         return Scaffold(
           appBar: AppBar(
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             title: Text(widget.title),
           ),
           body: DocumentListWidget(
-            documents: documentListManager.documentList,
-            selectedDocuments: documentListManager.selectedDocuments,
-            select: documentListManager.selectDocument,
-            deleteDocument: documentListManager.deleteDocument,
-            renameDocument: documentListManager.renameDocument,
+            documents: model.documentList,
+            selectedDocuments: model.selectedDocuments,
+            select: model.selectDocument,
+            deleteDocument: model.deleteDocument,
+            renameDocument: model.renameDocument,
             loadDocument: loadDocument,
           ),
           floatingActionButton: FloatingActionButton(
-            onPressed: documentListManager.selectedDocuments.isEmpty
+            onPressed: model.selectedDocuments.isEmpty
                 ? _newDocument
                 : () async {
                     final confirmed = await DialogService.delete(context);
                     if (confirmed == true) {
-                      documentListManager.deleteSelectedDocuments();
+                      model.deleteSelectedDocuments();
                     }
                   },
-            tooltip: documentListManager.selectedDocuments.isEmpty
+            tooltip: model.selectedDocuments.isEmpty
                 ? 'Digitalize um novo documento'
                 : 'Delete todos os documentos selecionados',
-            child: documentListManager.selectedDocuments.isEmpty
+            child: model.selectedDocuments.isEmpty
                 ? const Icon(Icons.add)
                 : const Icon(Icons.delete),
           ),
         );
-      },
-    );
   }
 }

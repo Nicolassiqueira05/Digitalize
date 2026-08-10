@@ -120,20 +120,23 @@ class DialogService {
                   'Deletar documento?',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => {Navigator.pop(context, false)},
-                      child: const Text('Fechar'),
+                Padding(
+                    padding: EdgeInsetsGeometry.all(10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => {Navigator.pop(context, false)},
+                          child: const Text('Fechar'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => {Navigator.pop(context, true)},
+                          child: const Text('Confirmar'),
+                        ),
+                      ],
                     ),
-                    ElevatedButton(
-                      onPressed: () => {Navigator.pop(context, true)},
-                      child: const Text('Confirmar'),
-                    ),
-                  ],
-                ),
+                )
               ],
             ),
           ),

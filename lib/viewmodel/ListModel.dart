@@ -2,10 +2,11 @@ import 'package:digitalize/Data/Database/database.dart';
 import 'package:digitalize/Data/Models/document_model.dart';
 import 'package:flutter/cupertino.dart';
 
-class DocumentListManager extends ChangeNotifier {
+class ListModel extends ChangeNotifier {
   final DatabaseManager databaseManager = DatabaseManager();
   List<DocumentModel> documentList = [];
   Set<DocumentModel> selectedDocuments = {};
+
 
   Future<void> loadDocuments() async {
     List<DocumentModel> t = await databaseManager.getDocuments();
@@ -47,8 +48,5 @@ class DocumentListManager extends ChangeNotifier {
 
     await loadDocuments();
   }
-
-  //Final da Selection
-
 
 }
