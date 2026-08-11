@@ -95,12 +95,9 @@ class DocumentPickerManager extends ChangeNotifier{
       print("Existe? ${await file.exists()}");
 
       images.add(ImageModel(path: file.path));
-      print("Imagem salva em: ${file.path}");
     }
 
     d.images = images;
-
-    print(d);
 
     await databaseManager.insertDocument(d);
 

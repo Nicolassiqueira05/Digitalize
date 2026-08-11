@@ -4,6 +4,7 @@ import 'package:digitalize/document_page.dart';
 import 'package:digitalize/view/custom_widgets/dialog_service.dart';
 import 'package:digitalize/viewmodel/ListModel.dart';
 import 'package:digitalize/document_picker.dart';
+import 'package:digitalize/viewmodel/document_list_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -48,52 +49,17 @@ class _MyHomePageState extends State<MyHomePage> {
     context.read<ListModel>().loadDocuments();
   }
 
-  void _newDocument() async {
-    var d = await Navigator.of(context).push(
-      MaterialPageRoute<bool>(builder: (context) => const DocumentPicker()),
-    );
-
-    if (d == true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Documento salvo'),
-          duration: Duration(seconds: 4),
-          behavior: SnackBarBehavior.floating,
-
-          margin: EdgeInsets.only(bottom: 1, left: 16, right: 16),
-
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-      );
-    }
-
-    context.read<ListModel>().loadDocuments();
-  }
-
-  void loadDocument(DocumentModel doc) async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => DocumentPage(document: doc)),
-    );
-
-    if (result == true) {
-      context.read<ListModel>().loadDocuments();
-    }
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     context.read<ListModel>().loadDocuments();
   }
 
-  DatabaseManager db = DatabaseManager();
-
   @override
   Widget build(BuildContext context) {
     final model = context.watch<ListModel>();
+
+    final documentListController = DocumentListController(model: model);
 
     return Scaffold(
       appBar: AppBar(
@@ -106,27 +72,14 @@ class _MyHomePageState extends State<MyHomePage> {
         itemBuilder: (context, index) {
           return DocumentItemWidget(
             doc: model.documentList[index],
-            selectMode: model.selectedDocuments.isNotEmpty,
-            selected: model.selectedDocuments.contains(
-              model.documentList[index].id,
-            ),
-            select: () => model.selectDocument(model.documentList[index]),
-            deleteDocument: () =>
-                model.deleteDocument(model.documentList[index]),
-            renameDocument: model.renameDocument,
-            loadDocument: loadDocument,
+            documentListController: documentListController,
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: model.selectedDocuments.isEmpty
-            ? _newDocument
-            : () async {
-                final confirmed = await DialogService.delete(context);
-                if (confirmed == true) {
-                  model.deleteSelectedDocuments();
-                }
-              },
+            ? () => documentListController.createDocument(context)
+            : () => documentListController.deleteSelectedDocuments(context),
         tooltip: model.selectedDocuments.isEmpty
             ? 'Digitalize um novo documento'
             : 'Delete todos os documentos selecionados',
@@ -139,37 +92,28 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class DocumentItemWidget extends StatelessWidget {
+
   final DocumentModel doc;
-
-  final bool selectMode;
-  final bool selected;
-  final Function() select;
-  final Function() deleteDocument;
-  final Function(DocumentModel, String) renameDocument;
-  final Function(DocumentModel) loadDocument;
-
-  DialogService dialogService = DialogService();
+  final DocumentListController documentListController;
 
   DocumentItemWidget({
     super.key,
     required this.doc,
-    required this.selectMode,
-    required this.selected,
-    required this.select,
-    required this.deleteDocument,
-    required this.renameDocument,
-    required this.loadDocument,
+    required this.documentListController,
   });
 
   @override
   Widget build(BuildContext context) {
-    if (!selectMode) {
+    final model = context.read<ListModel>();
+
+
+    if (!model.selectedDocuments.isNotEmpty) {
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ListTile(
-          onTap: () => {loadDocument(doc)},
-          onLongPress: select,
+          onTap: () => {documentListController.loadDocument(context, doc)},
+          onLongPress: () => {model.selectDocument(doc)},
           leading: const Icon(Icons.description),
           title: Text(doc.name),
           subtitle: Text(doc.createdAt),
@@ -177,21 +121,11 @@ class DocumentItemWidget extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: () async {
-                  final t = await DialogService.rename(context, doc);
-                  if (t == null) return;
-                  await renameDocument(doc, t);
-                },
+                onPressed: () => documentListController.rename(context, doc),
                 icon: const Icon(Icons.drive_file_rename_outline),
               ),
               IconButton(
-                onPressed: () async {
-                  final confirmed = await DialogService.delete(context);
-
-                  if (confirmed == true) {
-                    await deleteDocument();
-                  }
-                },
+                onPressed: () => documentListController.delete(context, doc),
                 icon: const Icon(Icons.delete),
               ),
             ],
@@ -203,9 +137,9 @@ class DocumentItemWidget extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ListTile(
-          onTap: select,
+          onTap: () => model.selectDocument(doc),
           onLongPress: () => {},
-          leading: selected
+          leading: model.isSelected(doc)
               ? Icon(Icons.check_circle_rounded)
               : Icon(Icons.circle_outlined),
           title: Text(doc.name),

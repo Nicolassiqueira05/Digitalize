@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:digitalize/Data/Models/document_model.dart';
-import 'package:digitalize/viewmodel/document_list_manager.dart';
 import 'package:digitalize/viewmodel/document_picker_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

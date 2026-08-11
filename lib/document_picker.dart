@@ -77,8 +77,6 @@ class _DocumentPickerState extends State<DocumentPicker> {
                   var ci = await cropFuture;
                   if (ci == null) return;
 
-                  print(ci);
-
                   await DialogService.save(context, () async {
                     await documentPickerManager.saveImage(ci, nome);
                   });

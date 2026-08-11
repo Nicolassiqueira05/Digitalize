@@ -40,6 +40,10 @@ class ListModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool isSelected(DocumentModel doc){
+    return selectedDocuments.contains(doc.id);
+  }
+
   Future<void> deleteSelectedDocuments() async {
     for (var id in selectedDocuments){
       await databaseManager.deleteDocument(documentList.firstWhere((e) => e.id == id));
