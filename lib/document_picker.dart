@@ -31,9 +31,6 @@ class _DocumentPickerState extends State<DocumentPicker> {
     setState(() {
       currentIndex = index;
     });
-
-    // Atualiza o controller da imagem atual
-    //documentPickerManager.setImage(index);
   }
 
   void turnAspectRatioRow(bool b) {
